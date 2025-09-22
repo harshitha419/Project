@@ -1,0 +1,64 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Industrial Robotics</title>
+</head>
+<body style="font-family:Arial; text-align:center; background:#f4f6f7;">
+  <h1>Automatic Industrial Robotics</h1>
+  <p>Robots are used in factories for welding, assembly, packaging, and more.</p>
+  
+  <h3>Examples:</h3>
+  <ul style="display:inline-block; text-align:left;">
+    <li>Robotic Arms</li>
+    <li>Welding Robots</li>
+    <li>Material Handling</li>
+  </ul>
+  
+  <h3>Simulation</h3>
+  <button onclick="startRobot()">Start Robot</button>
+  <p id="status"></p>
+
+  <script>
+    function startRobot() {
+      let s = document.getElementById("status");
+      s.innerHTML = "🤖 Robot Activated...";
+      setTimeout(()=>s.innerHTML="⚙️ Welding in Progress...",2000);
+      setTimeout(()=>s.innerHTML="📦 Packaging Products...",4000);
+      setTimeout(()=>s.innerHTML="✅ Task Completed!",6000);
+    }
+  </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Industrial Robotics</title>
+</head>
+<body style="font-family:Arial; text-align:center; background:#f4f6f7;">
+  <h1>Automatic Industrial Robotics</h1>
+  <p>Robots are used in factories for welding, assembly, packaging, and more.</p>
+  
+  <h3>Examples:</h3>
+  <ul style="display:inline-block; text-align:left;">
+    <li>Robotic Arms</li>
+    <li>Welding Robots</li>
+    <li>Material Handling</li>
+  </ul>
+  
+  <h3>Simulation</h3>
+  <button onclick="startRobot()">Start Robot</button>
+  <p id="status"></p>
+
+  <script>
+    function startRobot() {
+      let s = document.getElementById("status");
+      s.innerHTML = "🤖 Robot Activated...";
+      setTimeout(()=>s.innerHTML="⚙️ Welding in Progress...",2000);
+      setTimeout(()=>s.innerHTML="📦 Packaging Products...",4000);
+      setTimeout(()=>s.innerHTML="✅ Task Completed!",6000);
+    }
+  </script>
+</body>
+</html>
