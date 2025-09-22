@@ -1,64 +1,225 @@
+import React, { useState, useEffect } from "react";
 
+// Health Dashboard - Single-file React component (Tailwind CSS assumed)
+// Features:
+// - Water intake tracker (persisted to localStorage)
+// - BMI calculator
+// - Symptom quick-check (informational only)
+// - Daily activity summary (steps input)
+// - Health tips card
 
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Industrial Robotics</title>
-</head>
-<body style="font-family:Arial; text-align:center; background:#f4f6f7;">
-  <h1>Automatic Industrial Robotics</h1>
-  <p>Robots are used in factories for welding, assembly, packaging, and more.</p>
-  
-  <h3>Examples:</h3>
-  <ul style="display:inline-block; text-align:left;">
-    <li>Robotic Arms</li>
-    <li>Welding Robots</li>
-    <li>Material Handling</li>
-  </ul>
-  
-  <h3>Simulation</h3>
-  <button onclick="startRobot()">Start Robot</button>
-  <p id="status"></p>
+export default function HealthDashboard() {
+  // --- Water Tracker ---
+  const [waterGoal, setWaterGoal] = useState(() => {
+    const saved = localStorage.getItem("health.waterGoal");
+    return saved ? Number(saved) : 2000; // ml
+  });
+  const [waterIntake, setWaterIntake] = useState(() => {
+    const saved = localStorage.getItem("health.waterIntake");
+    return saved ? Number(saved) : 0;
+  });
 
-  <script>
-    function startRobot() {
-      let s = document.getElementById("status");
-      s.innerHTML = "🤖 Robot Activated...";
-      setTimeout(()=>s.innerHTML="⚙️ Welding in Progress...",2000);
-      setTimeout(()=>s.innerHTML="📦 Packaging Products...",4000);
-      setTimeout(()=>s.innerHTML="✅ Task Completed!",6000);
-    }
-  </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Industrial Robotics</title>
-</head>
-<body style="font-family:Arial; text-align:center; background:#f4f6f7;">
-  <h1>Automatic Industrial Robotics</h1>
-  <p>Robots are used in factories for welding, assembly, packaging, and more.</p>
-  
-  <h3>Examples:</h3>
-  <ul style="display:inline-block; text-align:left;">
-    <li>Robotic Arms</li>
-    <li>Welding Robots</li>
-    <li>Material Handling</li>
-  </ul>
-  
-  <h3>Simulation</h3>
-  <button onclick="startRobot()">Start Robot</button>
-  <p id="status"></p>
+  // --- BMI Calculator ---
+  const [heightCm, setHeightCm] = useState(170);
+  const [weightKg, setWeightKg] = useState(70);
+  const [bmi, setBmi] = useState(null);
 
-  <script>
-    function startRobot() {
-      let s = document.getElementById("status");
-      s.innerHTML = "🤖 Robot Activated...";
-      setTimeout(()=>s.innerHTML="⚙️ Welding in Progress...",2000);
-      setTimeout(()=>s.innerHTML="📦 Packaging Products...",4000);
-      setTimeout(()=>s.innerHTML="✅ Task Completed!",6000);
-    }
-  </script>
-</body>
-</html>
+  // --- Steps / Activity ---
+  const [steps, setSteps] = useState(() => {
+    const saved = localStorage.getItem("health.steps");
+    return saved ? Number(saved) : 0;
+  });
+
+  // Persist water and steps when changed
+  useEffect(() => {
+    localStorage.setItem("health.waterGoal", String(waterGoal));
+  }, [waterGoal]);
+
+  useEffect(() => {
+    localStorage.setItem("health.waterIntake", String(waterIntake));
+  }, [waterIntake]);
+
+  useEffect(() => {
+    localStorage.setItem("health.steps", String(steps));
+  }, [steps]);
+
+  // BMI calculation
+  useEffect(() => {
+    const h = Number(heightCm) / 100;
+    if (h > 0) {
+      const calc = Number(weightKg) / (h * h);
+      setBmi(Number(calc.toFixed(1)));
+    } else setBmi(null);
+  }, [heightCm, weightKg]);
+
+  // helpers
+  const addGlass = (ml = 250) => setWaterIntake((v) => Math.min(v + ml, waterGoal * 2));
+  const resetWater = () => setWaterIntake(0);
+
+  const progressPct = Math.min(100, Math.round((waterIntake / waterGoal) * 100));
+
+  const bmiCategory = (val) => {
+    if (!val) return "—";
+    if (val < 18.5) return "Underweight";
+    if (val < 25) return "Normal"
+    if (val < 30) return "Overweight";
+    return "Obese";
+  };
+
+  // Simple symptom checker (non-diagnostic informational)
+  const symptomAdvice = (symptoms) => {
+    // symptoms: string
+    const s = symptoms.toLowerCase();
+    if (!s) return "Enter symptoms (e.g., cough, fever) and press Check.";
+    if (s.includes("fever") || s.includes("high temperature")) return "Fever present — monitor temperature; drink fluids; seek medical care if >38.5°C or if severe.";
+    if (s.includes("cough") && s.includes("breath")) return "Cough with breathlessness — consider urgent medical evaluation.";
+    if (s.includes("headache") && s.includes("stiff")) return "Severe headache with neck stiffness — seek immediate medical attention.";
+    return "Symptoms are non-specific. If mild, rest and monitor. If symptoms worsen or are severe, contact a healthcare professional.";
+  };
+
+  // UI
+  return (
+    <div className="min-h-screen bg-gray-50 p-6 font-sans">
+      <div className="max-w-4xl mx-auto">
+        <header className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold">Health Dashboard</h1>
+          <div className="text-sm text-gray-600">Track · Calculate · Learn</div>
+        </header>
+
+        <main className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Left column: Water + Activity */}
+          <section className="md:col-span-2 space-y-6">
+            <div className="bg-white p-4 rounded-2xl shadow-sm">
+              <h2 className="font-semibold mb-2">Water Intake</h2>
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <div className="text-sm text-gray-600">Goal: {waterGoal} ml</div>
+                  <input
+                    type="range"
+                    min="500"
+                    max="5000"
+                    step="100"
+                    value={waterGoal}
+                    onChange={(e) => setWaterGoal(Number(e.target.value))}
+                    className="w-full"
+                  />
+                </div>
+                <div className="w-40 text-right">
+                  <div className="text-lg font-medium">{waterIntake} / {waterGoal} ml</div>
+                  <div className="text-sm text-gray-500">{progressPct}%</div>
+                </div>
+              </div>
+
+              <div className="mt-4 flex gap-2">
+                <button onClick={() => addGlass(200)} className="px-3 py-2 rounded-lg bg-indigo-600 text-white">+200 ml</button>
+                <button onClick={() => addGlass(250)} className="px-3 py-2 rounded-lg bg-indigo-500 text-white">+250 ml</button>
+                <button onClick={() => addGlass(500)} className="px-3 py-2 rounded-lg bg-indigo-400 text-white">+500 ml</button>
+                <button onClick={resetWater} className="px-3 py-2 rounded-lg border">Reset</button>
+              </div>
+
+              <div className="mt-4">
+                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <div style={{ width: `${progressPct}%` }} className="h-3 rounded-full bg-gradient-to-r from-indigo-400 to-indigo-700"></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl shadow-sm">
+              <h2 className="font-semibold mb-2">Daily Activity</h2>
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <label className="text-sm text-gray-600">Steps today</label>
+                  <input
+                    type="number"
+                    className="mt-1 w-full border rounded-md px-3 py-2"
+                    value={steps}
+                    onChange={(e) => setSteps(Number(e.target.value))}
+                    min={0}
+                  />
+                </div>
+                <div className="w-36 text-right">
+                  <div className="text-lg font-medium">{steps} steps</div>
+                  <div className="text-sm text-gray-500">Goal: 10,000</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl shadow-sm">
+              <h2 className="font-semibold mb-2">Symptom Quick-Check</h2>
+              <SymptomChecker adviceFn={symptomAdvice} />
+            </div>
+
+          </section>
+
+          {/* Right column: BMI + Tips */}
+          <aside className="space-y-6">
+            <div className="bg-white p-4 rounded-2xl shadow-sm">
+              <h2 className="font-semibold mb-2">BMI Calculator</h2>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm text-gray-600">Height (cm)</label>
+                  <input type="number" value={heightCm} onChange={(e) => setHeightCm(Number(e.target.value))} className="mt-1 w-full border rounded-md px-3 py-2" />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600">Weight (kg)</label>
+                  <input type="number" value={weightKg} onChange={(e) => setWeightKg(Number(e.target.value))} className="mt-1 w-full border rounded-md px-3 py-2" />
+                </div>
+                <div className="pt-2 border-t flex items-center justify-between">
+                  <div>
+                    <div className="text-lg font-medium">{bmi ?? "—"}</div>
+                    <div className="text-sm text-gray-500">{bmi ? bmiCategory(bmi) : ''}</div>
+                  </div>
+                  <div className="text-sm text-gray-600">BMI = kg / (m²)</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl shadow-sm">
+              <h2 className="font-semibold mb-2">Daily Health Tips</h2>
+              <ul className="list-disc list-inside text-sm space-y-2 text-gray-700">
+                <li>Drink water regularly — aim for a consistent routine.</li>
+                <li>Move frequently — short walks every 45–60 minutes help circulation.</li>
+                <li>Balanced meals with vegetables, lean protein, and whole grains.</li>
+                <li>Sleep 7–9 hours per night for most adults.</li>
+                <li>If in doubt about symptoms, contact a healthcare professional.</li>
+              </ul>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl shadow-sm text-sm text-gray-600">
+              <strong>Note:</strong> This app provides simple tracking and educational info. It is <em>not</em> a substitute for professional medical advice.
+            </div>
+          </aside>
+        </main>
+
+        <footer className="text-center text-xs text-gray-500 mt-8">Made with care · Local data only (stored in browser)</footer>
+      </div>
+    </div>
+  );
+}
+
+// ------------------ SymptomChecker Component ------------------
+function SymptomChecker({ adviceFn }) {
+  const [input, setInput] = useState("");
+  const [advice, setAdvice] = useState("");
+
+  const handleCheck = () => setAdvice(adviceFn(input));
+
+  return (
+    <div>
+      <textarea
+        rows={3}
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="List symptoms, e.g. fever, cough, headache"
+        className="w-full border rounded-md p-2"
+      />
+      <div className="mt-3 flex gap-2">
+        <button onClick={handleCheck} className="px-3 py-2 rounded-lg bg-emerald-600 text-white">Check</button>
+        <button onClick={() => { setInput(""); setAdvice(""); }} className="px-3 py-2 rounded-lg border">Clear</button>
+      </div>
+      {advice && (
+        <div className="mt-3 bg-gray-50 border rounded-md p-3 text-sm text-gray-700">{advice}</div>
+      )}
+    </div>
+  );
+}
